@@ -77,7 +77,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/db"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
-	"github.com/grafana/grafana/pkg/services/store"
+	"github.com/grafana/grafana/pkg/services/stars"
 	"github.com/grafana/grafana/pkg/services/teamguardian"
 	teamguardianDatabase "github.com/grafana/grafana/pkg/services/teamguardian/database"
 	teamguardianManager "github.com/grafana/grafana/pkg/services/teamguardian/manager"
@@ -228,6 +228,7 @@ var wireBasicSet = wire.NewSet(
 	wire.Bind(new(alerting.DashAlertExtractor), new(*alerting.DashAlertExtractorService)),
 	comments.ProvideService,
 	guardian.ProvideService,
+	stars.ProvideService,
 )
 
 var wireSet = wire.NewSet(
