@@ -20,11 +20,19 @@ import (
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
 	"github.com/grafana/grafana/pkg/setting"
+<<<<<<< HEAD
 	"github.com/grafana/grafana/pkg/util"
+=======
+	starstests "github.com/grafana/grafana/pkg/services/stars/starstests"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+>>>>>>> 64fb445a87 (Fix: Adjust ProvideDashboardService  func signatures to include starsFake)
 )
 
 var orgID = int64(1)
 var user = &models.SignedInUser{UserId: 1}
+
 
 func TestProvideFolderService(t *testing.T) {
 	t.Run("should register scope resolvers", func(t *testing.T) {
@@ -32,7 +40,7 @@ func TestProvideFolderService(t *testing.T) {
 		cfg := setting.NewCfg()
 		features := featuremgmt.WithFeatures()
 		permissionsServices := acmock.NewPermissionsServicesMock()
-		dashboardService := ProvideDashboardService(cfg, store, nil, features, permissionsServices)
+		dashboardService := ProvideDashboardService(cfg, store, nil, features, permissionsServices, starsFake)
 		ac := acmock.New()
 
 		ProvideFolderService(
@@ -48,10 +56,11 @@ func TestFolderService(t *testing.T) {
 	t.Run("Folder service tests", func(t *testing.T) {
 		store := &dashboards.FakeDashboardStore{}
 		cfg := setting.NewCfg()
+		starsFake := starstests.NewStarsServiceFake()
+		defer store.AssertExpectations(t)
 		features := featuremgmt.WithFeatures()
 		permissionsServices := acmock.NewPermissionsServicesMock()
-		dashboardService := ProvideDashboardService(cfg, store, nil, features, permissionsServices)
-
+		dashboardService := ProvideDashboardService(cfg, store, nil, features, permissionsServices, starsFake)
 		service := FolderServiceImpl{
 			cfg:              cfg,
 			log:              log.New("test-folder-service"),

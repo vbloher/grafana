@@ -24,6 +24,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/guardian"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
+	starstests "github.com/grafana/grafana/pkg/services/stars/starstests"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 )
@@ -202,9 +203,10 @@ func createDashboard(t *testing.T, sqlStore *sqlstore.SQLStore, user models.Sign
 
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	dashAlertExtractor := alerting.ProvideDashAlertExtractorService(nil, nil)
+	starsFake := starstests.NewStarsServiceFake()
 	service := dashboardservice.ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, dashAlertExtractor,
-		featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(),
+		featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(), starsFake,
 	)
 	dashboard, err := service.SaveDashboard(context.Background(), dashItem, true)
 	require.NoError(t, err)
@@ -220,10 +222,10 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 	features := featuremgmt.WithFeatures()
 	permissionsServices := acmock.NewPermissionsServicesMock()
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
-
+	starsFake := starstests.NewStarsServiceFake()
 	d := dashboardservice.ProvideDashboardService(
 		cfg, dashboardStore, nil,
-		features, permissionsServices,
+		features, permissionsServices, starsFake,
 	)
 	ac := acmock.New()
 	s := dashboardservice.ProvideFolderService(
@@ -317,11 +319,13 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 		sqlStore := sqlstore.InitTestDB(t)
 		guardian.InitLegacyGuardian(sqlStore)
 		dashboardStore := database.ProvideDashboardStore(sqlStore)
+		starsFake := starstests.NewStarsServiceFake()
 		dashboardService := dashboardservice.ProvideDashboardService(
 			setting.NewCfg(), dashboardStore, nil,
-			featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(),
+			featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(), starsFake,
 		)
 		ac := acmock.New()
+
 		service := LibraryElementService{
 			Cfg:      setting.NewCfg(),
 			SQLStore: sqlStore,
