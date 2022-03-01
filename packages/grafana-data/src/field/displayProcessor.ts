@@ -67,6 +67,8 @@ export function getDisplayProcessor(options?: DisplayProcessorOptions): DisplayP
     if (!isBooleanUnit(unit)) {
       unit = 'bool';
     }
+  } else if (!unit && field.type === FieldType.string) {
+    unit = 'string';
   }
 
   const formatFunc = getValueFormat(unit || 'none');
