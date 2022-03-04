@@ -171,9 +171,9 @@ export class CloudMonitoringVariableQueryEditor extends PureComponent<Props, Var
   }
 
   componentDidUpdate(prevProps: Readonly<Props>, prevState: Readonly<VariableQueryData>) {
-    const selecQueryTypeChanged = prevState.selectedQueryType !== this.state.selectedQueryType;
+    const selectQueryTypeChanged = prevState.selectedQueryType !== this.state.selectedQueryType;
     const selectSLOServiceChanged = this.state.selectedSLOService !== prevState.selectedSLOService;
-    if (selecQueryTypeChanged || selectSLOServiceChanged) {
+    if (selectQueryTypeChanged || selectSLOServiceChanged) {
       this.onPropsChange();
     }
   }
