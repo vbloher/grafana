@@ -5,13 +5,14 @@ import (
 	"sort"
 
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/stars"
 	"github.com/grafana/grafana/pkg/setting"
 
 	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/models"
 )
 
-func ProvideService(cfg *setting.Cfg, bus bus.Bus, sqlstore *sqlstore.SQLStore) *SearchService {
+func ProvideService(cfg *setting.Cfg, bus bus.Bus, sqlstore *sqlstore.SQLStore, starManager stars.Manager) *SearchService {
 	s := &SearchService{
 		Cfg: cfg,
 		Bus: bus,
@@ -19,7 +20,8 @@ func ProvideService(cfg *setting.Cfg, bus bus.Bus, sqlstore *sqlstore.SQLStore) 
 			SortAlphaAsc.Name:  SortAlphaAsc,
 			SortAlphaDesc.Name: SortAlphaDesc,
 		},
-		sqlstore: sqlstore,
+		sqlstore:    sqlstore,
+		starManager: starManager,
 	}
 	s.Bus.AddHandler(s.SearchHandler)
 	return s
@@ -52,6 +54,7 @@ type SearchService struct {
 	Cfg         *setting.Cfg
 	sortOptions map[string]models.SortOption
 	sqlstore    sqlstore.Store
+	starManager stars.Manager
 }
 
 func (s *SearchService) SearchHandler(ctx context.Context, query *Query) error {
@@ -108,11 +111,10 @@ func (s *SearchService) setStarredDashboards(ctx context.Context, userID int64, 
 		UserId: userID,
 	}
 
-	err := s.sqlstore.GetUserStars(ctx, &query)
+	iuserstars, err := s.starManager.GetUserStars(ctx, &query)
 	if err != nil {
 		return err
 	}
-	iuserstars := query.Result
 	for _, dashboard := range hits {
 		if _, ok := iuserstars[dashboard.ID]; ok {
 			dashboard.IsStarred = true
