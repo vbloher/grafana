@@ -18,16 +18,19 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/searchstore"
+	"github.com/grafana/grafana/pkg/services/stars"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
 func TestDashboardDataAccess(t *testing.T) {
 	var sqlStore *sqlstore.SQLStore
+	var starManager stars.Manager
 	var savedFolder, savedDash, savedDash2 *models.Dashboard
 	var dashboardStore *DashboardStore
 
 	setup := func() {
 		sqlStore = sqlstore.InitTestDB(t)
+		starManager = stars.ProvideService(sqlStore)
 		dashboardStore = ProvideDashboardStore(sqlStore)
 		savedFolder = insertTestDashboard(t, dashboardStore, "1 test dash folder", 1, 0, true, "prod", "webapp")
 		savedDash = insertTestDashboard(t, dashboardStore, "test dash 23", 1, savedFolder.Id, false, "prod", "webapp")
@@ -383,13 +386,13 @@ func TestDashboardDataAccess(t *testing.T) {
 	t.Run("Should be able to search for starred dashboards", func(t *testing.T) {
 		setup()
 		starredDash := insertTestDashboard(t, dashboardStore, "starred dash", 1, 0, false)
-		err := sqlStore.StarDashboard(context.Background(), &models.StarDashboardCommand{
+		err := starManager.StarDashboard(context.Background(), &models.StarDashboardCommand{
 			DashboardId: starredDash.Id,
 			UserId:      10,
 		})
 		require.NoError(t, err)
 
-		err = sqlStore.StarDashboard(context.Background(), &models.StarDashboardCommand{
+		err = starManager.StarDashboard(context.Background(), &models.StarDashboardCommand{
 			DashboardId: savedDash.Id,
 			UserId:      1,
 		})
@@ -429,24 +432,18 @@ func TestDashboardDataAccessGivenPluginWithImportedDashboards(t *testing.T) {
 func TestDashboard_SortingOptions(t *testing.T) {
 	sqlStore := sqlstore.InitTestDB(t)
 	dashboardStore := ProvideDashboardStore(sqlStore)
-
-	dashB := insertTestDashboard(t, dashboardStore, "Beta", 1, 0, false)
-	dashA := insertTestDashboard(t, dashboardStore, "Alfa", 1, 0, false)
-	assert.NotZero(t, dashA.Id)
-	assert.Less(t, dashB.Id, dashA.Id)
-	qNoSort := &models.FindPersistedDashboardsQuery{
-		SignedInUser: &models.SignedInUser{OrgId: 1, UserId: 1, OrgRole: models.ROLE_ADMIN},
-	}
-	dashboards, err := sqlStore.FindDashboards(context.Background(), qNoSort)
-	require.NoError(t, err)
-	require.Len(t, dashboards, 2)
-	assert.Equal(t, dashA.Id, dashboards[0].ID)
-	assert.Equal(t, dashB.Id, dashboards[1].ID)
-
-	qSort := &models.FindPersistedDashboardsQuery{
-		SignedInUser: &models.SignedInUser{OrgId: 1, UserId: 1, OrgRole: models.ROLE_ADMIN},
-		Sort: models.SortOption{
-			Filter: []models.SortOptionFilter{
+	// insertTestDashboard uses GoConvey's assertions. Workaround.
+	t.Run("test with multiple sorting options", func(t *testing.T) {
+		sqlStore := sqlstore.InitTestDB(t)
+		dashB := insertTestDashboard(t, dashboardStore, "Beta", 1, 0, false)
+		dashA := insertTestDashboard(t, dashboardStore, "Alfa", 1, 0, false)
+		assert.NotZero(t, dashA.Id)
+		assert.Less(t, dashB.Id, dashA.Id)
+		q := &models.FindPersistedDashboardsQuery{
+			SignedInUser: &models.SignedInUser{OrgId: 1, UserId: 1, OrgRole: models.ROLE_ADMIN},
+			// adding two sorting options (silly no-op example, but it'll complicate the query)
+			Filters: []interface{}{
+				searchstore.TitleSorter{},
 				searchstore.TitleSorter{Descending: true},
 			},
 		},
