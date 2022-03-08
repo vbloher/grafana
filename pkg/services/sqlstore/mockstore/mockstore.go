@@ -39,7 +39,6 @@ type SQLStoreMock struct {
 	ExpectedNotifierUsageStats     []*models.NotifierUsageStats
 	ExpectedPersistedDashboards    models.HitList
 	ExpectedSignedInUser           *models.SignedInUser
-	ExpectedUserStars              map[int64]bool
 	ExpectedError                  error
 }
 
