@@ -24,7 +24,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/guardian"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
-	starstests "github.com/grafana/grafana/pkg/services/stars/starstests"
+	startest "github.com/grafana/grafana/pkg/services/star/startest"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 )
@@ -203,7 +203,7 @@ func createDashboard(t *testing.T, sqlStore *sqlstore.SQLStore, user models.Sign
 
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	dashAlertExtractor := alerting.ProvideDashAlertExtractorService(nil, nil)
-	starsFake := starstests.NewStarsServiceFake()
+	starsFake := startest.NewStarsServiceFake()
 	service := dashboardservice.ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, dashAlertExtractor,
 		featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(), starsFake,
@@ -222,7 +222,7 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 	features := featuremgmt.WithFeatures()
 	permissionsServices := acmock.NewPermissionsServicesMock()
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
-	starsFake := starstests.NewStarsServiceFake()
+	starsFake := startest.NewStarsServiceFake()
 	d := dashboardservice.ProvideDashboardService(
 		cfg, dashboardStore, nil,
 		features, permissionsServices, starsFake,
@@ -319,7 +319,7 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 		sqlStore := sqlstore.InitTestDB(t)
 		guardian.InitLegacyGuardian(sqlStore)
 		dashboardStore := database.ProvideDashboardStore(sqlStore)
-		starsFake := starstests.NewStarsServiceFake()
+		starsFake := startest.NewStarsServiceFake()
 		dashboardService := dashboardservice.ProvideDashboardService(
 			setting.NewCfg(), dashboardStore, nil,
 			featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(), starsFake,

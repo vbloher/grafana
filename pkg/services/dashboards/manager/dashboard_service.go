@@ -16,7 +16,7 @@ import (
 	m "github.com/grafana/grafana/pkg/services/dashboards"
 	"github.com/grafana/grafana/pkg/services/featuremgmt"
 	"github.com/grafana/grafana/pkg/services/guardian"
-	"github.com/grafana/grafana/pkg/services/stars"
+	"github.com/grafana/grafana/pkg/services/star"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/util"
 	"github.com/grafana/grafana/pkg/util/errutil"
@@ -39,12 +39,12 @@ type DashboardServiceImpl struct {
 	features             featuremgmt.FeatureToggles
 	folderPermissions    accesscontrol.PermissionsService
 	dashboardPermissions accesscontrol.PermissionsService
-	starsManager         stars.Manager
+	starManager          star.Manager
 }
 
 func ProvideDashboardService(
 	cfg *setting.Cfg, store m.Store, dashAlertExtractor alerting.DashAlertExtractor,
-	features featuremgmt.FeatureToggles, permissionsServices accesscontrol.PermissionsServices, starsManager stars.Manager,
+	features featuremgmt.FeatureToggles, permissionsServices accesscontrol.PermissionsServices, starManager star.Manager,
 ) *DashboardServiceImpl {
 	return &DashboardServiceImpl{
 		cfg:                  cfg,
@@ -54,7 +54,7 @@ func ProvideDashboardService(
 		features:             features,
 		folderPermissions:    permissionsServices.GetFolderService(),
 		dashboardPermissions: permissionsServices.GetDashboardService(),
-		starsManager:         starsManager,
+		starManager:          starManager,
 	}
 }
 
@@ -174,7 +174,7 @@ func (dr *DashboardServiceImpl) UpdateDashboardACL(ctx context.Context, uid int6
 }
 
 func (dr *DashboardServiceImpl) DashboardIsStarredByUserCtx(ctx context.Context, cmd *models.IsStarredByUserQuery) (bool, error) {
-	return dr.starsManager.IsStarredByUserCtx(ctx, cmd)
+	return dr.starManager.IsStarredByUserCtx(ctx, cmd)
 }
 
 func (dr *DashboardServiceImpl) DeleteOrphanedProvisionedDashboards(ctx context.Context, cmd *models.DeleteOrphanedProvisionedDashboardsCommand) error {

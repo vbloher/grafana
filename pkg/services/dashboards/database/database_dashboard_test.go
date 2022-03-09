@@ -18,19 +18,19 @@ import (
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/searchstore"
-	"github.com/grafana/grafana/pkg/services/stars"
+	"github.com/grafana/grafana/pkg/services/star"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
 func TestDashboardDataAccess(t *testing.T) {
 	var sqlStore *sqlstore.SQLStore
-	var starManager stars.Manager
+	var starManager star.Manager
 	var savedFolder, savedDash, savedDash2 *models.Dashboard
 	var dashboardStore *DashboardStore
 
 	setup := func() {
 		sqlStore = sqlstore.InitTestDB(t)
-		starManager = stars.ProvideService(sqlStore)
+		starManager = star.ProvideService(sqlStore)
 		dashboardStore = ProvideDashboardStore(sqlStore)
 		savedFolder = insertTestDashboard(t, dashboardStore, "1 test dash folder", 1, 0, true, "prod", "webapp")
 		savedDash = insertTestDashboard(t, dashboardStore, "test dash 23", 1, savedFolder.Id, false, "prod", "webapp")
