@@ -33,7 +33,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/quota"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
-	startest "github.com/grafana/grafana/pkg/services/star/startest"
+	"github.com/grafana/grafana/pkg/services/star/startest"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/web"
 )
@@ -218,7 +218,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 		cfg := setting.NewCfg()
 		features := featuremgmt.WithFeatures()
 		dashboardStore := database.ProvideDashboardStore(sqlstore.InitTestDB(t))
-		starsFake := startest.NewStarsServiceFake()
+		starFake := startest.NewStarServiceFake()
 		hs := &HTTPServer{
 			Cfg:                   cfg,
 			Live:                  newTestLive(t),
@@ -226,7 +226,7 @@ func TestDashboardAPIEndpoint(t *testing.T) {
 			LibraryElementService: &mockLibraryElementService{},
 			SQLStore:              mockSQLStore,
 			dashboardService: service.ProvideDashboardService(
-				cfg, dashboardStore, nil, features, accesscontrolmock.NewPermissionsServicesMock(), starsFake,
+				cfg, dashboardStore, nil, features, accesscontrolmock.NewPermissionsServicesMock(), starFake,
 			),
 		}
 		hs.SQLStore = mockSQLStore
@@ -919,7 +919,7 @@ func getDashboardShouldReturn200WithConfig(t *testing.T, sc *scenarioContext, pr
 
 	libraryPanelsService := mockLibraryPanelService{}
 	libraryElementsService := mockLibraryElementService{}
-	starsFake := startest.NewStarsServiceFake()
+	starFake := startest.NewStarServiceFake()
 
 	cfg := setting.NewCfg()
 	features := featuremgmt.WithFeatures()
@@ -930,7 +930,7 @@ func getDashboardShouldReturn200WithConfig(t *testing.T, sc *scenarioContext, pr
 		SQLStore:              sc.sqlStore,
 		ProvisioningService:   provisioningService,
 		dashboardProvisioningService: service.ProvideDashboardService(
-			cfg, dashboardStore, nil, features, accesscontrolmock.NewPermissionsServicesMock(), starsFake,
+			cfg, dashboardStore, nil, features, accesscontrolmock.NewPermissionsServicesMock(), starFake,
 		),
 	}
 

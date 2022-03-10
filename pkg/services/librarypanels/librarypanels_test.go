@@ -23,7 +23,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/libraryelements"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/mockstore"
-	startest "github.com/grafana/grafana/pkg/services/star/startest"
+	"github.com/grafana/grafana/pkg/services/star/startest"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -1424,10 +1424,10 @@ func createDashboard(t *testing.T, sqlStore *sqlstore.SQLStore, user *models.Sig
 
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 	dashAlertService := alerting.ProvideDashAlertExtractorService(nil, nil)
-	starsFake := startest.NewStarsServiceFake()
+	starFake := startest.NewStarServiceFake()
 	service := dashboardservice.ProvideDashboardService(
 		setting.NewCfg(), dashboardStore, dashAlertService,
-		featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(), starsFake,
+		featuremgmt.WithFeatures(), acmock.NewPermissionsServicesMock(), starFake,
 	)
 	dashboard, err := service.SaveDashboard(context.Background(), dashItem, true)
 
@@ -1445,8 +1445,8 @@ func createFolderWithACL(t *testing.T, sqlStore *sqlstore.SQLStore, title string
 	permissionsServices := acmock.NewPermissionsServicesMock()
 	dashboardStore := database.ProvideDashboardStore(sqlStore)
 
-	starsFake := startest.NewStarsServiceFake()
-	d := dashboardservice.ProvideDashboardService(cfg, dashboardStore, nil, features, permissionsServices, starsFake)
+	starFake := startest.NewStarServiceFake()
+	d := dashboardservice.ProvideDashboardService(cfg, dashboardStore, nil, features, permissionsServices, starFake)
 	ac := acmock.New()
 	s := dashboardservice.ProvideFolderService(cfg, d, dashboardStore, nil, features, permissionsServices, ac)
 	t.Logf("Creating folder with title and UID %q", title)
@@ -1539,13 +1539,13 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 		sqlStore := sqlstore.InitTestDB(t)
 		dashboardStore := database.ProvideDashboardStore(sqlStore)
 
-		starsFake := startest.NewStarsServiceFake()
+		starFake := startest.NewStarServiceFake()
 		features := featuremgmt.WithFeatures()
 		permissionsServices := acmock.NewPermissionsServicesMock()
 
 		dashboardService := dashboardservice.ProvideDashboardService(
 			cfg, dashboardStore, &alerting.DashAlertExtractorService{},
-			features, permissionsServices, starsFake,
+			features, permissionsServices, starFake,
 		)
 		ac := acmock.New()
 
