@@ -5,8 +5,10 @@ import (
 	// remove the cron (v1) dependency
 
 	_ "cloud.google.com/go/kms/apiv1"
+	_ "github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys/crypto"
 	_ "github.com/Azure/azure-sdk-for-go/services/keyvault/v7.1/keyvault"
 	_ "github.com/Azure/go-autorest/autorest"
+	_ "github.com/Azure/go-autorest/autorest/adal"
 	_ "github.com/beevik/etree"
 	_ "github.com/cortexproject/cortex/pkg/util"
 	_ "github.com/crewjam/saml"

@@ -88,9 +88,9 @@ func getManagedIdentityTokenRetriever(cfg *setting.Cfg, credentials *azcredentia
 }
 
 func getClientSecretTokenRetriever(credentials *azcredentials.AzureClientSecretCredentials) TokenRetriever {
-	var authority string
+	var authority azidentity.AuthorityHost
 	if credentials.Authority != "" {
-		authority = credentials.Authority
+		authority = azidentity.AuthorityHost(credentials.Authority)
 	} else {
 		authority = resolveAuthorityForCloud(credentials.AzureCloud)
 	}
@@ -102,7 +102,7 @@ func getClientSecretTokenRetriever(credentials *azcredentials.AzureClientSecretC
 	}
 }
 
-func resolveAuthorityForCloud(cloudName string) string {
+func resolveAuthorityForCloud(cloudName string) azidentity.AuthorityHost {
 	// Known Azure clouds
 	switch cloudName {
 	case setting.AzurePublic:
@@ -112,7 +112,7 @@ func resolveAuthorityForCloud(cloudName string) string {
 	case setting.AzureUSGovernment:
 		return azidentity.AzureGovernment
 	case setting.AzureGermany:
-		return azidentity.AzureGermany
+		return ""
 	default:
 		return ""
 	}
@@ -132,7 +132,11 @@ func (c *managedIdentityTokenRetriever) GetCacheKey() string {
 }
 
 func (c *managedIdentityTokenRetriever) Init() error {
-	if credential, err := azidentity.NewManagedIdentityCredential(c.clientId, nil); err != nil {
+	opts := &azidentity.ManagedIdentityCredentialOptions{
+		ID: azidentity.ClientID(c.clientId),
+	}
+
+	if credential, err := azidentity.NewManagedIdentityCredential(opts); err != nil {
 		return err
 	} else {
 		c.credential = credential
@@ -150,7 +154,7 @@ func (c *managedIdentityTokenRetriever) GetAccessToken(ctx context.Context, scop
 }
 
 type clientSecretTokenRetriever struct {
-	authority    string
+	authority    azidentity.AuthorityHost
 	tenantId     string
 	clientId     string
 	clientSecret string
