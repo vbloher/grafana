@@ -19,6 +19,7 @@ import (
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/services/sqlstore/searchstore"
 	"github.com/grafana/grafana/pkg/services/star"
+	starmodel "github.com/grafana/grafana/pkg/services/star/model"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
@@ -386,13 +387,13 @@ func TestDashboardDataAccess(t *testing.T) {
 	t.Run("Should be able to search for starred dashboards", func(t *testing.T) {
 		setup()
 		starredDash := insertTestDashboard(t, dashboardStore, "starred dash", 1, 0, false)
-		err := starService.StarDashboard(context.Background(), &models.StarDashboardCommand{
+		err := starService.StarDashboard(context.Background(), &starmodel.StarDashboardCommand{
 			DashboardId: starredDash.Id,
 			UserId:      10,
 		})
 		require.NoError(t, err)
 
-		err = starService.StarDashboard(context.Background(), &models.StarDashboardCommand{
+		err = starService.StarDashboard(context.Background(), &starmodel.StarDashboardCommand{
 			DashboardId: savedDash.Id,
 			UserId:      1,
 		})
