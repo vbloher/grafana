@@ -8,6 +8,7 @@ import (
 	"github.com/grafana/grafana/pkg/util/maputil"
 
 	sdkhttpclient "github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
+	httplogger "github.com/grafana/grafana-plugin-sdk-go/experimental/http_logger"
 	"github.com/grafana/grafana/pkg/infra/httpclient"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/prometheus/client_golang/api"
@@ -63,9 +64,11 @@ func (p *Provider) GetClient(headers map[string]string) (apiv1.API, error) {
 		return nil, err
 	}
 
+	httpLogger := httplogger.NewHTTPLogger("prometheus", roundTripper)
+
 	cfg := api.Config{
 		Address:      p.settings.URL,
-		RoundTripper: roundTripper,
+		RoundTripper: httpLogger,
 	}
 
 	client, err := api.NewClient(cfg)
