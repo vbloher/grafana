@@ -18,8 +18,9 @@ import (
 
 type SocialAzureAD struct {
 	*SocialBase
-	allowedGroups     []string
-	autoAssignOrgRole string
+	allowedGroups       []string
+	autoAssignOrgRole   string
+	roleAttributeStrict bool
 }
 
 type azureClaims struct {
