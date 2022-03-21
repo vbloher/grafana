@@ -5,17 +5,17 @@ import "errors"
 var ErrCommandValidationFailed = errors.New("command missing required fields")
 
 type Star struct {
-	ID          int64
-	UserID      int64
-	DashboardID int64
+	ID          int64 `xorm:"id"`
+	UserID      int64 `xorm:"user_id"`
+	DashboardID int64 `xorm:"dashboard_id"`
 }
 
 // ----------------------
 // COMMANDS
 
 type StarDashboardCommand struct {
-	UserID      int64
-	DashboardID int64
+	UserID      int64 `xorm:"user_id"`
+	DashboardID int64 `xorm:"Dashboard_id"`
 }
 
 func (cmd *StarDashboardCommand) Validate() error {
@@ -26,8 +26,8 @@ func (cmd *StarDashboardCommand) Validate() error {
 }
 
 type UnstarDashboardCommand struct {
-	UserID      int64
-	DashboardID int64
+	UserID      int64 `xorm:"user_id"`
+	DashboardID int64 `xorm:"dashboard_id"`
 }
 
 func (cmd *UnstarDashboardCommand) Validate() error {
@@ -41,12 +41,12 @@ func (cmd *UnstarDashboardCommand) Validate() error {
 // QUERIES
 
 type GetUserStarsQuery struct {
-	UserID int64
+	UserID int64 `xorm:"user_id"`
 }
 
 type IsStarredByUserQuery struct {
-	UserID      int64
-	DashboardID int64
+	UserID      int64 `xorm:"user_id"`
+	DashboardID int64 `xorm:"dashboard_id"`
 }
 
 type GetUserStarsResult struct {

@@ -15,7 +15,7 @@ type store interface {
 }
 
 type storeImpl struct {
-	sqlStore sqlstore.Store
+	sqlStore sqlstore.StoreDBSession
 }
 
 func newStarStore(sqlstore sqlstore.Store) *storeImpl {
