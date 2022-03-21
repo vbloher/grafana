@@ -9,14 +9,14 @@ import (
 type FakeStarService struct {
 	ExpectedStars     *star.Star
 	ExpectedError     error
-	ExpectedUserStars map[int64]bool
+	ExpectedUserStars star.GetUserStarsResult
 }
 
 func NewStarServiceFake() *FakeStarService {
 	return &FakeStarService{}
 }
 
-func (f *FakeStarService) IsStarredByUserCtx(ctx context.Context, query *star.IsStarredByUserQuery) (bool, error) {
+func (f *FakeStarService) IsStarredByUser(ctx context.Context, query *star.IsStarredByUserQuery) (bool, error) {
 	return true, f.ExpectedError
 }
 
@@ -28,7 +28,7 @@ func (f *FakeStarService) UnstarDashboard(ctx context.Context, cmd *star.UnstarD
 	return f.ExpectedError
 }
 
-func (f *FakeStarService) GetUserStars(ctx context.Context, query *star.GetUserStarsQuery) (map[int64]bool, error) {
+func (f *FakeStarService) GetUserStars(ctx context.Context, query *star.GetUserStarsQuery) (star.GetUserStarsResult, error) {
 	return f.ExpectedUserStars, f.ExpectedError
 }
 

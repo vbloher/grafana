@@ -108,15 +108,15 @@ func sortedHits(unsorted models.HitList) models.HitList {
 
 func (s *SearchService) setStarredDashboards(ctx context.Context, userID int64, hits []*models.Hit) error {
 	query := star.GetUserStarsQuery{
-		UserId: userID,
+		UserID: userID,
 	}
 
-	iuserstars, err := s.starService.GetUserStars(ctx, &query)
+	iuserstarsresult, err := s.starService.GetUserStars(ctx, &query)
 	if err != nil {
 		return err
 	}
 	for _, dashboard := range hits {
-		if _, ok := iuserstars[dashboard.ID]; ok {
+		if _, ok := iuserstarsresult.UserStars[dashboard.ID]; ok {
 			dashboard.IsStarred = true
 		}
 	}

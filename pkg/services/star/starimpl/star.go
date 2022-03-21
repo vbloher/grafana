@@ -12,28 +12,28 @@ type serviceImpl struct {
 }
 
 func ProvideService(sqlstore sqlstore.Store) star.Service {
-	m := &serviceImpl{starStore: newStarStore(sqlstore)}
-	return m
+	s := &serviceImpl{starStore: newStarStore(sqlstore)}
+	return s
 }
 
-func (m *serviceImpl) StarDashboard(ctx context.Context, cmd *star.StarDashboardCommand) error {
-	if cmd.DashboardId == 0 || cmd.UserId == 0 {
-		return star.ErrCommandValidationFailed
+func (s *serviceImpl) StarDashboard(ctx context.Context, cmd *star.StarDashboardCommand) error {
+	if err := cmd.Validate(); err != nil {
+		return err
 	}
-	return m.starStore.insert(ctx, cmd)
+	return s.starStore.insert(ctx, cmd)
 }
 
-func (m *serviceImpl) UnstarDashboard(ctx context.Context, cmd *star.UnstarDashboardCommand) error {
-	if cmd.DashboardId == 0 || cmd.UserId == 0 {
-		return star.ErrCommandValidationFailed
+func (s *serviceImpl) UnstarDashboard(ctx context.Context, cmd *star.UnstarDashboardCommand) error {
+	if err := cmd.Validate(); err != nil {
+		return err
 	}
-	return m.starStore.delete(ctx, cmd)
+	return s.starStore.delete(ctx, cmd)
 }
 
-func (m *serviceImpl) IsStarredByUserCtx(ctx context.Context, query *star.IsStarredByUserQuery) (bool, error) {
-	return m.starStore.isStarredByUserCtx(ctx, query)
+func (s *serviceImpl) IsStarredByUser(ctx context.Context, query *star.IsStarredByUserQuery) (bool, error) {
+	return s.starStore.isStarredByUser(ctx, query)
 }
 
-func (m *serviceImpl) GetUserStars(ctx context.Context, cmd *star.GetUserStarsQuery) (map[int64]bool, error) {
-	return m.starStore.getUserStars(ctx, cmd)
+func (s *serviceImpl) GetUserStars(ctx context.Context, cmd *star.GetUserStarsQuery) (star.GetUserStarsResult, error) {
+	return s.starStore.getUserStars(ctx, cmd)
 }

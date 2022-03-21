@@ -174,7 +174,7 @@ func (dr *DashboardServiceImpl) UpdateDashboardACL(ctx context.Context, uid int6
 }
 
 func (dr *DashboardServiceImpl) DashboardIsStarredByUserCtx(ctx context.Context, cmd *star.IsStarredByUserQuery) (bool, error) {
-	return dr.starService.IsStarredByUserCtx(ctx, cmd)
+	return dr.starService.IsStarredByUser(ctx, cmd)
 }
 
 func (dr *DashboardServiceImpl) DeleteOrphanedProvisionedDashboards(ctx context.Context, cmd *models.DeleteOrphanedProvisionedDashboardsCommand) error {

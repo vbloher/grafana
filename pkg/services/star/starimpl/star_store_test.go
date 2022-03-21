@@ -19,24 +19,24 @@ func TestUserStarsDataAccess(t *testing.T) {
 
 		t.Run("Given saved star", func(t *testing.T) {
 			cmd := star.StarDashboardCommand{
-				DashboardId: 10,
-				UserId:      12,
+				DashboardID: 10,
+				UserID:      12,
 			}
 
 			err := starsStore.insert(context.Background(), &cmd)
 			require.NoError(t, err)
 
 			t.Run("IsStarredByUser should return true when starred", func(t *testing.T) {
-				query := star.IsStarredByUserQuery{UserId: 12, DashboardId: 10}
-				isStarred, err := starsStore.isStarredByUserCtx(context.Background(), &query)
+				query := star.IsStarredByUserQuery{UserID: 12, DashboardID: 10}
+				isStarred, err := starsStore.isStarredByUser(context.Background(), &query)
 				require.NoError(t, err)
 
 				require.True(t, isStarred)
 			})
 
 			t.Run("IsStarredByUser should return false when not starred", func(t *testing.T) {
-				query := star.IsStarredByUserQuery{UserId: 12, DashboardId: 12}
-				isStarred, err := starsStore.isStarredByUserCtx(context.Background(), &query)
+				query := star.IsStarredByUserQuery{UserID: 12, DashboardID: 12}
+				isStarred, err := starsStore.isStarredByUser(context.Background(), &query)
 				require.NoError(t, err)
 
 				require.False(t, isStarred)

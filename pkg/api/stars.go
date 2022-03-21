@@ -15,9 +15,9 @@ func (hs *HTTPServer) StarDashboard(c *models.ReqContext) response.Response {
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "id is invalid", err)
 	}
-	cmd := star.StarDashboardCommand{UserId: c.UserId, DashboardId: id}
+	cmd := star.StarDashboardCommand{UserID: c.UserId, DashboardID: id}
 
-	if cmd.DashboardId <= 0 {
+	if cmd.DashboardID <= 0 {
 		return response.Error(400, "Missing dashboard id", nil)
 	}
 
@@ -33,9 +33,9 @@ func (hs *HTTPServer) UnstarDashboard(c *models.ReqContext) response.Response {
 	if err != nil {
 		return response.Error(http.StatusBadRequest, "id is invalid", err)
 	}
-	cmd := star.UnstarDashboardCommand{UserId: c.UserId, DashboardId: id}
+	cmd := star.UnstarDashboardCommand{UserID: c.UserId, DashboardID: id}
 
-	if cmd.DashboardId <= 0 {
+	if cmd.DashboardID <= 0 {
 		return response.Error(400, "Missing dashboard id", nil)
 	}
 
