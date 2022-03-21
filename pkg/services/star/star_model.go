@@ -1,4 +1,4 @@
-package starmodel
+package star
 
 import "errors"
 

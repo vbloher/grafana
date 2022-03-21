@@ -1,14 +1,14 @@
 //go:build integration
 // +build integration
 
-package star
+package starimpl
 
 import (
 	"context"
 	"testing"
 
 	"github.com/grafana/grafana/pkg/services/sqlstore"
-	starmodel "github.com/grafana/grafana/pkg/services/star/model"
+	"github.com/grafana/grafana/pkg/services/star"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +18,7 @@ func TestUserStarsDataAccess(t *testing.T) {
 		starsStore := newStarStore(sqlStore)
 
 		t.Run("Given saved star", func(t *testing.T) {
-			cmd := starmodel.StarDashboardCommand{
+			cmd := star.StarDashboardCommand{
 				DashboardId: 10,
 				UserId:      12,
 			}
@@ -27,7 +27,7 @@ func TestUserStarsDataAccess(t *testing.T) {
 			require.NoError(t, err)
 
 			t.Run("IsStarredByUser should return true when starred", func(t *testing.T) {
-				query := starmodel.IsStarredByUserQuery{UserId: 12, DashboardId: 10}
+				query := star.IsStarredByUserQuery{UserId: 12, DashboardId: 10}
 				isStarred, err := starsStore.isStarredByUserCtx(context.Background(), &query)
 				require.NoError(t, err)
 
@@ -35,7 +35,7 @@ func TestUserStarsDataAccess(t *testing.T) {
 			})
 
 			t.Run("IsStarredByUser should return false when not starred", func(t *testing.T) {
-				query := starmodel.IsStarredByUserQuery{UserId: 12, DashboardId: 12}
+				query := star.IsStarredByUserQuery{UserId: 12, DashboardId: 12}
 				isStarred, err := starsStore.isStarredByUserCtx(context.Background(), &query)
 				require.NoError(t, err)
 
