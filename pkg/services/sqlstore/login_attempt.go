@@ -14,7 +14,7 @@ var getTimeNow = time.Now
 func (ss *SQLStore) addLoginAttemptQueryAndCommandHandlers() {
 	bus.AddHandler("sql", ss.CreateLoginAttempt)
 	bus.AddHandler("sql", ss.DeleteOldLoginAttempts)
-	bus.AddHandler("sql", GetUserLoginAttemptCount)
+	bus.AddHandler("sql", ss.GetUserLoginAttemptCount)
 }
 
 func (ss *SQLStore) CreateLoginAttempt(ctx context.Context, cmd *models.CreateLoginAttemptCommand) error {
@@ -65,7 +65,7 @@ func (ss *SQLStore) DeleteOldLoginAttempts(ctx context.Context, cmd *models.Dele
 	})
 }
 
-func GetUserLoginAttemptCount(ctx context.Context, query *models.GetUserLoginAttemptCountQuery) error {
+func (ss *SQLStore) GetUserLoginAttemptCount(ctx context.Context, query *models.GetUserLoginAttemptCountQuery) error {
 	loginAttempt := new(models.LoginAttempt)
 	total, err := x.
 		Where("username = ?", query.Username).
