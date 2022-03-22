@@ -149,8 +149,3 @@ type Store interface {
 	GetDashboardPermissionsForUser(ctx context.Context, query *models.GetDashboardPermissionsForUserQuery) error
 	GetDashboardSlugById(ctx context.Context, query *models.GetDashboardSlugByIdQuery) error
 }
-
-type StoreDBSession interface {
-	WithDbSession(ctx context.Context, callback DBTransactionFunc) error
-	WithTransactionalDbSession(ctx context.Context, callback DBTransactionFunc) error
-}

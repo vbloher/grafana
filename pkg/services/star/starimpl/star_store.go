@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/grafana/grafana/pkg/services/sqlstore"
+	"github.com/grafana/grafana/pkg/services/sqlstore/db"
 	"github.com/grafana/grafana/pkg/services/star"
 )
 
@@ -15,7 +16,7 @@ type store interface {
 }
 
 type storeImpl struct {
-	sqlStore sqlstore.StoreDBSession
+	sqlStore db.DB
 }
 
 func newStarStore(sqlstore sqlstore.Store) *storeImpl {
