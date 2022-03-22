@@ -1,6 +1,7 @@
 import {
   DataFrame,
   DataLink,
+  DataQuery,
   dateTime,
   Field,
   KeyValue,
@@ -18,6 +19,7 @@ import React from 'react';
 import { LokiQuery } from '../../../plugins/datasource/loki/types';
 import { getFieldLinksForExplore } from '../utils/links';
 
+const splunkUID = 'PD90232BAD06BE469';
 /**
  * This is a factory for the link creator. It returns the function mainly so it can return undefined in which case
  * the trace view won't create any links and to capture the datasource and split function making it easier to memoize
@@ -32,6 +34,8 @@ export function createSpanLinkFactory({
   traceToLogsOptions?: TraceToLogsOptions;
   dataFrame?: DataFrame;
 }): SpanLinkFunc | undefined {
+  const isSplunkDS = !!(traceToLogsOptions?.datasourceUid === splunkUID);
+
   if (!dataFrame || dataFrame.fields.length === 1 || !dataFrame.fields.some((f) => Boolean(f.config.links?.length))) {
     // if the dataframe contains just a single blob of data (legacy format) or does not have any links configured,
     // let's try to use the old legacy path.
@@ -45,7 +49,7 @@ export function createSpanLinkFactory({
           field,
           rowIndex: span.dataFrameRowIndex!,
           splitOpenFn,
-          range: getTimeRangeFromSpan(span),
+          range: getTimeRangeFromSpan(span, isSplunkDS),
           dataFrame,
         });
 
@@ -80,15 +84,15 @@ function legacyCreateSpanLinkFactory(splitOpenFn: SplitOpen, traceToLogsOptions?
     // the moment. Issue is that the trace itself isn't clearly mapped to dataFrame (right now it's just a json blob
     // inside a single field) so the dataLinks as config of that dataFrame abstraction breaks down a bit and we do
     // it manually here instead of leaving it for the data source to supply the config.
-
-    const dataLink: DataLink<LokiQuery> = {
+    const isSplunkDS = !!(dataSourceSettings.uid === splunkUID);
+    const dataLink: DataLink<LokiQuery | DataQuery | any> = {
       title: dataSourceSettings.name,
       url: '',
       internal: {
         datasourceUid: dataSourceSettings.uid,
         datasourceName: dataSourceSettings.name,
         query: {
-          expr: getLokiQueryFromSpan(span, traceToLogsOptions),
+          [isSplunkDS ? 'query' : 'expr']: getQueryFromSpan(span, isSplunkDS, traceToLogsOptions),
           refId: '',
         },
       },
@@ -98,7 +102,7 @@ function legacyCreateSpanLinkFactory(splitOpenFn: SplitOpen, traceToLogsOptions?
       link: dataLink,
       internalLink: dataLink.internal!,
       scopedVars: {},
-      range: getTimeRangeFromSpan(span, {
+      range: getTimeRangeFromSpan(span, isSplunkDS, {
         startMs: traceToLogsOptions.spanStartTimeShift
           ? rangeUtil.intervalToMs(traceToLogsOptions.spanStartTimeShift)
           : 0,
@@ -122,7 +126,9 @@ function legacyCreateSpanLinkFactory(splitOpenFn: SplitOpen, traceToLogsOptions?
  */
 const defaultKeys = ['cluster', 'hostname', 'namespace', 'pod'];
 
-function getLokiQueryFromSpan(span: TraceSpan, options: TraceToLogsOptions): string {
+function getQueryFromSpan(span: TraceSpan, isSplunkDS: boolean, options: TraceToLogsOptions): string {
+  console.log('getQueryFromSpan', span, isSplunkDS);
+
   const { tags: keys, filterByTraceID, filterBySpanID, mapTagNamesEnabled, mappedTags } = options;
 
   // In order, try to use mapped tags -> tags -> default tags
@@ -143,10 +149,15 @@ function getLokiQueryFromSpan(span: TraceSpan, options: TraceToLogsOptions): str
     return acc;
   }, [] as string[]);
 
-  let query = `{${tags.join(', ')}}`;
-
-  if (filterByTraceID && span.traceID) {
+  let query = '';
+  if (!isSplunkDS) {
+    query += `{${tags.join(', ')}}`;
+  }
+  if (filterByTraceID && span.traceID && !isSplunkDS) {
     query += ` |="${span.traceID}"`;
+  } else if (filterByTraceID && span.traceID && isSplunkDS) {
+    // search | where _time > 0 - This query works, but _time is a derived field
+    query += `search | where traceID = ${span.traceID}`;
   }
   if (filterBySpanID && span.spanID) {
     query += ` |="${span.spanID}"`;
@@ -160,6 +171,7 @@ function getLokiQueryFromSpan(span: TraceSpan, options: TraceToLogsOptions): str
  */
 function getTimeRangeFromSpan(
   span: TraceSpan,
+  isSplunkDS: boolean,
   timeShift: { startMs: number; endMs: number } = { startMs: 0, endMs: 0 }
 ): TimeRange {
   const adjustedStartTime = Math.floor(span.startTime / 1000 + timeShift.startMs);
@@ -169,9 +181,12 @@ function getTimeRangeFromSpan(
 
   // Because we can only pass milliseconds in the url we need to check if they equal.
   // We need end time to be later than start time
-  if (adjustedStartTime === adjustedEndTime) {
+  if (isSplunkDS && adjustedEndTime - adjustedStartTime < 1000) {
+    adjustedEndTime = adjustedStartTime + 1000;
+  } else if (adjustedStartTime === adjustedEndTime) {
     adjustedEndTime++;
   }
+
   const to = dateTime(adjustedEndTime);
 
   // Beware that public/app/features/explore/state/main.ts SplitOpen fn uses the range from here. No matter what is in the url.
