@@ -7,7 +7,7 @@ export const FileUploader = () => {
       readAs="readAsArrayBuffer"
       options={{
         multiple: false,
-        onDrop: (acceptedFiles: any[]) => {
+        onDrop: (acceptedFiles: File[]) => {
           let formData = new FormData();
           formData.append('file', acceptedFiles[0]);
           fetch('/api/storage/upload', {

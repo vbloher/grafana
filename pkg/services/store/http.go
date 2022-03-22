@@ -31,15 +31,16 @@ func (s *httpStorage) Upload(c *models.ReqContext) response.Response {
 		grafanaStorageLogger.Error("error in parsing form", err)
 		return response.Error(400, "error parsing form", err)
 	}
-	cmd, err := s.store.Upload(c.Req.Context(), c.SignedInUser, c.Req.MultipartForm)
+	res, err := s.store.Upload(c.Req.Context(), c.SignedInUser, c.Req.MultipartForm)
 
 	if err != nil {
 		return response.Error(400, "cannot call upload", err)
 	}
 
-	return response.JSON(200, map[string]string{
+	return response.JSON(res.statusCode, map[string]string{
 		"action": "upload",
-		"path":   cmd.Path,
+		"path":   res.path,
+		"file":   res.fileName,
 	})
 }
 
