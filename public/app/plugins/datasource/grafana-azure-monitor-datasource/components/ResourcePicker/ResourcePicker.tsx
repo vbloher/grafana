@@ -141,11 +141,9 @@ const ResourcePicker = ({ resourcePickerData, resourceURI, onApply, onCancel }: 
           />
 
           <div className={styles.selectionFooter}>
-            <h5>Selection</h5>
-
             {selectedResourceRows.length > 0 && (
               <>
-                <Space v={2} />
+                <h5>Selection</h5>
                 <NestedResourceTable
                   rows={selectedResourceRows}
                   requestNestedRows={requestNestedRows}
