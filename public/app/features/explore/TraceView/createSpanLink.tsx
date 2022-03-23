@@ -127,8 +127,6 @@ function legacyCreateSpanLinkFactory(splitOpenFn: SplitOpen, traceToLogsOptions?
 const defaultKeys = ['cluster', 'hostname', 'namespace', 'pod'];
 
 function getQueryFromSpan(span: TraceSpan, isSplunkDS: boolean, options: TraceToLogsOptions): string {
-  console.log('getQueryFromSpan', span, isSplunkDS);
-
   const { tags: keys, filterByTraceID, filterBySpanID, mapTagNamesEnabled, mappedTags } = options;
 
   // In order, try to use mapped tags -> tags -> default tags
@@ -150,14 +148,14 @@ function getQueryFromSpan(span: TraceSpan, isSplunkDS: boolean, options: TraceTo
   }, [] as string[]);
 
   let query = '';
-  if (!isSplunkDS) {
+  if (tags.length > 0) {
     query += `{${tags.join(', ')}}`;
   }
+
   if (filterByTraceID && span.traceID && !isSplunkDS) {
     query += ` |="${span.traceID}"`;
   } else if (filterByTraceID && span.traceID && isSplunkDS) {
-    // search | where _time > 0 - This query works, but _time is a derived field
-    query += `search | where traceID = ${span.traceID}`;
+    query += `TraceID=${span.traceID}`;
   }
   if (filterBySpanID && span.spanID) {
     query += ` |="${span.spanID}"`;
@@ -184,6 +182,7 @@ function getTimeRangeFromSpan(
   if (isSplunkDS && adjustedEndTime - adjustedStartTime < 1000) {
     adjustedEndTime = adjustedStartTime + 1000;
   } else if (adjustedStartTime === adjustedEndTime) {
+    // Splunk requires a time interval of >= 1s, rather than >=1ms like Loki timerange in above if block
     adjustedEndTime++;
   }
 
